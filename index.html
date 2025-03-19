@@ -6,9 +6,9 @@
     <title>المستشار القانوني الإلكتروني</title>
     <style>
       :root {
-        --alg-green: #006633; 
-        --alg-red: #d21034; 
-        --alg-gold: #ffd700; 
+        --alg-green: #006633;
+        --alg-red: #d21034;
+        --alg-gold: #ffd700;
       }
 
       body {
@@ -41,11 +41,24 @@
       }
 
       .chat-header {
+        position: relative;
         background-color: var(--alg-green);
         color: white;
         padding: 1rem;
         border-radius: 5px 5px 0 0;
         text-align: right;
+      }
+
+      .audio-container {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+      }
+
+      #audio-icon {
+        font-size: 28px;
+        cursor: pointer;
+        user-select: none;
       }
 
       .chat-box {
@@ -145,6 +158,10 @@
     <div class="chat-container">
       <div class="chat-header">
         <h2>خدمة الاستشارات القانونية عن بعد</h2>
+        <div class="audio-container">
+          <div id="audio-icon">🔇</div>
+          <audio id="audio" src="Assets/ta7yateboun.mp3" loop></audio>
+        </div>
       </div>
 
       <div class="chat-box" id="chat-box">
@@ -179,10 +196,9 @@
         if (message) {
           addMessage(message, "user");
 
-            const botResponse = await generateLegalResponse(message);
-            console.log(botResponse);
-            addMessage(botResponse, "bot");
-    
+          const botResponse = await generateLegalResponse(message);
+          console.log(botResponse);
+          addMessage(botResponse, "bot");
 
           userInput.value = "";
         }
@@ -237,6 +253,21 @@
       userInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           sendMessage();
+        }
+      });
+
+      const audioIcon = document.getElementById("audio-icon");
+      const audio = document.getElementById("audio");
+      audio.muted = true;
+
+      audioIcon.addEventListener("click", () => {
+        if (audio.muted) {
+        audio.muted = false;
+        audio.play();
+        audioIcon.textContent = "🔊";
+        } else {
+        audio.muted = true; 
+        audioIcon.textContent = "🔇"; 
         }
       });
     </script>
