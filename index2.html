@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>المستشار القانوني الإلكتروني</title>
+    <style>
+      :root {
+        --alg-green: #006633; 
+        --alg-red: #d21034; 
+        --alg-gold: #ffd700; 
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      .header {
+        background-color: white;
+        padding: 1rem 2rem;
+        border-bottom: 3px solid var(--alg-green);
+        display: flex;
+        align-items: center;
+        direction: rtl;
+      }
+
+      .header img {
+        height: 60px;
+        margin-left: 20px;
+      }
+
+      .chat-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      .chat-header {
+        background-color: var(--alg-green);
+        color: white;
+        padding: 1rem;
+        border-radius: 5px 5px 0 0;
+        text-align: right;
+      }
+
+      .chat-box {
+        height: 60vh;
+        min-height: 400px;
+        overflow-y: auto;
+        padding: 20px;
+        direction: rtl;
+      }
+
+      .message {
+        margin: 15px 0;
+        padding: 12px 20px;
+        border-radius: 10px;
+        max-width: 75%;
+        line-height: 1.6;
+        text-align: right;
+      }
+
+      .user-message {
+        background-color: var(--alg-green);
+        color: white;
+        margin-left: 0;
+        margin-right: auto;
+      }
+
+      .bot-message {
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        color: #333;
+        margin-left: auto;
+        margin-right: 0;
+      }
+
+      .input-container {
+        padding: 20px;
+        background-color: #f8f8f8;
+        border-top: 2px solid #ddd;
+        display: flex;
+        gap: 10px;
+        direction: rtl;
+      }
+
+      #user-input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        text-align: right;
+      }
+
+      #send-button {
+        padding: 12px 24px;
+        background-color: var(--alg-red);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .official-banner {
+        text-align: center;
+        padding: 10px;
+        background: linear-gradient(
+          to right,
+          var(--alg-green),
+          white,
+          var(--alg-red)
+        );
+        color: var(--alg-green);
+        font-size: 0.9em;
+        font-weight: bold;
+      }
+
+      .legal-disclaimer {
+        padding: 15px;
+        background-color: #fff3cd;
+        border-top: 2px solid #ffeeba;
+        text-align: center;
+        font-size: 0.85em;
+        color: #856404;
+        direction: rtl;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="official-banner">
+      بوابة إلكترونية رسمية - الجمهورية الجزائرية الديمقراطية الشعبية
+    </div>
+
+    <header class="header">
+      <img src="algerian-emblem.png" alt="الشعار الوطني" />
+      <h1>المستشار القانوني الإلكتروني</h1>
+    </header>
+
+    <div class="chat-container">
+      <div class="chat-header">
+        <h2>خدمة الاستشارات القانونية عن بعد</h2>
+      </div>
+
+      <div class="chat-box" id="chat-box">
+        <div class="bot-message message">
+          مرحبًا بكم في المستشار القانوني الإلكتروني. كيف يمكنني مساعدتكم اليوم؟
+        </div>
+      </div>
+
+      <div class="legal-disclaimer">
+        ⚖️ هذه الاستشارات ذات طبيعة إعلامية ولا تغني عن استشارة محامٍ معتمد. يتم
+        تسجيل جميع المحادثات لأغراض أرشيفية.
+      </div>
+
+      <div class="input-container">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="اكتب استفسارك القانوني هنا..."
+        />
+        <button id="send-button">إرسال</button>
+      </div>
+    </div>
+
+    <script>
+      const chatBox = document.getElementById("chat-box");
+      const userInput = document.getElementById("user-input");
+      const sendButton = document.getElementById("send-button");
+
+      async function sendMessage() {
+        const message = userInput.value.trim();
+
+        if (message) {
+          addMessage(message, "user");
+
+            const botResponse = await generateLegalResponse(message);
+            console.log(botResponse);
+            addMessage(botResponse, "bot");
+    
+
+          userInput.value = "";
+        }
+      }
+
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.textContent = text;
+
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      async function generateLegalResponse(userMessage) {
+        try {
+          const response = await fetch("http://127.0.0.1:5000/process_text", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({prompt: userMessage }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const data = await response.json();
+          respense = data.reply;
+          console.log(response)
+        } catch (error) {
+          console.error("Error:", error);
+          const responses = {
+            طلاق: "تنظم قواعد الطلاق في القانون الجزائري بموجب قانون الأسرة المواد 48 إلى 54. يرجى تقديم معلومات أكثر عن حالتك.",
+            إرث: "التوريث في الجزائر يحكمه القانون رقم 84-11. هل ترغب في معرفة المزيد عن تقسيم الميراث حسب الشريعة الإسلامية؟",
+            "عقد عمل":
+              "تنظم عقود العمل بموجب القانون 90-11. هل لديك سؤال محدد حول بند معين في العقد؟",
+            generated:
+              "شكرًا لاستشارتكم. لمزيد من التفاصيل، يرجى التواصل مع مكتب محاماة معتمد أو مراجعة النصوص القانونية ذات الصلة.",
+          };
+
+          const lowerCaseMessage = userMessage.toLowerCase();
+          respense = responses[lowerCaseMessage] || responses["default"];
+          
+          return respense;
+        }
+        return respense;
+        
+      }
+
+      // Event listeners
+      sendButton.addEventListener("click", sendMessage);
+      userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>
