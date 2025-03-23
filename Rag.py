@@ -4,26 +4,28 @@
 import ollama
 from chromadb import Documents, EmbeddingFunction, Client
 from typing import List
-import instructor
-from instructor import Instructor
+import json
 
 # 1. Prepare Documents
-documents = [
-    "Ollama is a lightweight framework for running large language models locally",
-    "ChromaDB is an open-source embedding database for building AI applications",
-    "RAG stands for Retrieval-Augmented Generation used in AI systems",
-    "LLMs can generate human-like text but need grounding with factual information",
-]
+# 1. Prepare Documents
+with open(f"laws_json\\All_laws.json","r",encoding="utf-8") as file :
+    laws = json.load(file)
+documents = [str(l[list(l.keys())[0]]) for l in laws]
+print(documents[0:5])
+# Save documents to a text file (for demonstration)
+with open("data.txt", "w",encoding="utf-8") as f:
+    f.write("\n".join(documents))
+
 
 # Save documents to a text file (for demonstration)
-with open("data.txt", "w") as f:
+with open("data.txt", "w",encoding="utf-8") as f:
     f.write("\n".join(documents))
 
 # 2. Document Processing
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 def chunk_documents():
-    with open("data.txt") as f:
+    with open("data.txt",encoding="utf-8") as f:
         text = f.read()
     
     text_splitter = RecursiveCharacterTextSplitter(
@@ -37,7 +39,7 @@ chunks = chunk_documents()
 
 # 3. Embedding Function using Ollama
 class OllamaEmbeddingFunction(EmbeddingFunction):
-    def __call__(self, texts: Documents) -> List[Embedding]:
+    def __call__(self, texts: Documents):
         embeddings = []
         for text in texts:
             response = ollama.embeddings(
@@ -69,17 +71,17 @@ def rag_query(query: str, temperature: float = 0.7):
     )["embedding"]
     
 
+    
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=3
     )
-    
 
     context = "\n\n".join(results["documents"][0])
     
     
     response = ollama.generate(
-        model="llama2",
+        model="mistral:latest",
         prompt=f"""Answer the question using only this context:
         {context}
         
@@ -91,6 +93,6 @@ def rag_query(query: str, temperature: float = 0.7):
 
 
 if __name__ == "__main__":
-    query = "What is RAG used for?"
+    query = "Who is nadir?"
     print("Question:", query)
     print("Answer:", rag_query(query))
