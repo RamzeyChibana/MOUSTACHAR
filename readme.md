@@ -1,7 +1,7 @@
 **Moustachar**
 ================
 
-Moustachar is an AI-powered chatbot designed to answer legal questions based on Algerian law. It uses a Retrieval-Augmented Generation (RAG) approach over a collection of Algerian legal documents (laws, chapters, and articles) to provide precise, context-aware responses.
+Moustachar is an AI-powered chatbot designed to answer legal questions based on Algerian law. It uses a Retrieval-Augmented Generation (RAG) approach over a collection of Algerian legal documents to provide precise, context-aware responses.
 
 How It Was Made
 ---------------
