@@ -21,5 +21,5 @@ How It Was Made
 - **Frontend Interface**  
   A lightweight web UI built with HTML, CSS, and JavaScript (`index.html`) provides an interactive chat interface, sending user queries to the Flask backend and displaying responses seamlessly.
 
-  ![alt text](image.png)
+  ![WEbsite Image](Website/assets/image.png)
 
