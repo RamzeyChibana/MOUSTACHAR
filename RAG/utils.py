@@ -8,7 +8,7 @@ import faiss
 
 
 
-def filter_by_metadata(query_metadata, metadata_list):
+def filter_by_metadata(query_metadata,keywords,metadata_list,content):
     """
     Returns indices of documents whose metadata matches the query.
     It checks if the query contains words from 'chapter' or 'file' metadata.
@@ -18,16 +18,20 @@ def filter_by_metadata(query_metadata, metadata_list):
     for i, meta in enumerate(metadata_list):
         chapter = meta["chapter"].lower()
         field = meta["field"].lower()
+        matches = sum(
+            1 for kw in keywords
+            if kw.lower() in content[i].lower() 
+        )
         # If the query includes either the chapter or file keywords, add the document index.
-        if chapter in query_metadata["chapter"].lower or field in query_metadata["field"]:
+        if chapter in query_metadata["chapter"].lower() or field in query_metadata["field"].lower() or matches:
             candidate_indices.append(i)
     return candidate_indices
 
-def apply_keyword_boost(results, keywords, top_k=5):
+def apply_keyword_boost(results,documents, keywords, top_k=5):
     """Boost documents containing keywords"""
     boosted = []
     for idx, score in results:
-        doc_keywords = metadata[idx]['keywords']
+        
         content = documents[idx].lower()
         
         # Calculate keyword matches
@@ -47,7 +51,7 @@ def parse_query(query,fields):
         1. Metadata filters (field , chapter name (Derived from the field and keywords)) 
         
         get field from those fields {fields}
-        2. Important keywords
+        2. Important keywords with important sentances
         3. ouput is french
         
         Query: {query}
@@ -83,4 +87,4 @@ def search_with_metadata(query_vector,embeddings,eligible_indices, k=10):
     distances, indices = subset_index.search(query_vector, k)
     
     
-    return [(eligible_indices[i], -dist) for i, dist in zip(indices[0], distances[0])]
+    return [(eligible_indices[i], -dist) for i, dist in zip(indices[0], distances[0])] 

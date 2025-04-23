@@ -4,7 +4,8 @@ import numpy as np
 import faiss
 from utils import filter_by_metadata,parse_query,search_with_metadata,apply_keyword_boost
 import tqdm
-import torch
+
+import os
 
 
 
@@ -17,6 +18,7 @@ class RagEngine():
     def __init__(self,laws_path="new_laws\\All_laws.json",fields_path="new_laws/fields.txt"):
         with open(f"{laws_path}", "r", encoding="utf-8") as file:
             laws = json.load(file)
+        
         with open(f"{fields_path}", "r",encoding="utf-8") as file:
             self.fields = file.read()
         self.documents = []
@@ -27,26 +29,35 @@ class RagEngine():
             law_title = list(law.keys())[0]
             content = str(law[law_title])
             
-            # Store document and metadata
-            self.documents.append(content)
-            self.metadata.append({"idx":idx,"chapter":laws["metadata"]["chapter"],"field":laws["metadata"]["field"]})
+            if content != "" :
+                self.documents.append(content)
+                self.metadata.append({"idx":idx,"chapter":law["metadata"]["chapter"],"field":law["metadata"]["file"]})
             
             pbar.update(1)
         pbar.close()
         # 2. Compute Embeddings for Each Document Using Ollama
+        data_path = "C:\dev\Ramzey\MOUSTACHAR\RAG\\embeddings"
+        files = os.listdir(data_path)
+        if not files :
+            pbar = tqdm.tqdm(total=len(laws))
+            pbar.set_description("Compute embeddings of documents")
+            all_embeddings = []
+            for doc in self.documents:
+                response = ollama.embeddings(
+                    model="snowflake-arctic-embed2",
+                    prompt=doc
+                )
+                all_embeddings.append(response["embedding"])
+                pbar.update(1)
+            pbar.close()
+            embeddings_np = np.array(all_embeddings, dtype=np.float32)
+         
+            print(np.save(f"{os.path.join(data_path,'embeddigns.npy')}",embeddings_np))
+        else :
+            embeddings_np = np.load(f"{os.path.join(data_path,'embeddigns.npy')}")
+        
+        self.embeddings_np = embeddings_np
 
-        pbar = tqdm.tqdm(total=len(laws))
-        pbar.set_description("Compute embeddings of documents")
-        all_embeddings = []
-        for doc in self.documents:
-            response = ollama.embeddings(
-                model="snowflake-arctic-embed2",
-                prompt=doc
-            )
-            all_embeddings.append(response["embedding"])
-            pbar.update(1)
-        pbar.close()
-        embeddings_np = np.array(all_embeddings, dtype=np.float32)
         index = faiss.IndexFlatL2(embeddings_np.shape[1])
         index.add(embeddings_np)
         print(f"Faiss index size: {index.ntotal}")
@@ -57,42 +68,44 @@ class RagEngine():
 
     def run(self,query: str):
         # Extract filters and keywords
-        result = parse_query(query)
+        result = parse_query(query,self.fields)
         query_keywords = result["keywords"]
         query_filters = result["filters"]
-        
+        print(f"filters : {result['filters']}")
+        print(f"keywordss : {result['keywords']}")
         # Step 1: Filter by metadata
-        eligible_indices = filter_by_metadata(query_filters,self.metadata)
+        eligible_indices = filter_by_metadata(query_filters,query_keywords,self.metadata,self.documents)
         
         # Step 2: Vector search with metadata filtering
         query_embedding = ollama.embeddings(
             model="snowflake-arctic-embed2",
             prompt=query
         )["embedding"]
-        
+        print(len(eligible_indices))
         # Search with metadata filtering
         vector_results = search_with_metadata(
             np.array([query_embedding], dtype=np.float32),
+            self.embeddings_np,
             eligible_indices,
             k=10
         )
         
         # Step 3: Keyword boosting
-        boosted_results = apply_keyword_boost(vector_results, query_keywords)
+        boosted_results = apply_keyword_boost(vector_results,self.documents, query_keywords)
         
         # Get top 3 results
         top_indices = [idx for idx, _ in boosted_results[:3]]
         context_docs = [self.documents[i] for i in top_indices]
-        context_meta = [{k: self.metadata[k][i] for k in self.metadata} for i in top_indices]
-        
+        # context_meta = [{k: self.metadata[k][i] for k in self.metadata} for i in top_indices]
+        print(context_docs)
         # Generate answer
         response = ollama.generate(
-            model="mistral:latest",
+            model="deepseek-r1:32b",
             prompt=f"""Legal Context:
-            {format_context(context_docs, context_meta)}
+            {context_docs}
             
             Question: {query}
-            Answer with legal citations:"""
+            act as legal advisor and answer based on context"""
         )
         return response["response"]
 
@@ -106,9 +119,11 @@ def format_context(docs, metas):
     )
 
 
-
-# query = "c'est combien le prix de passeport  "
-# print("Question:", query)
-# answer = rag_query(query)
-# print("-"*38,"answer","-"*38)
-# print("Answer:", answer)
+rag = RagEngine()
+query = "combien peut une personne physique ne peut appartenir conseils de surveillance de sociétés par actions ayant leur siège social en Algérie simultanément "
+query = "Quelle proportion minimale de la surface rédactionnelle une publication périodique d’information générale, régionale ou locale doit-elle consacrer à des contenus relatifs à sa zone de couverture géographique ?"
+query = "Quel est le montant du droit de timbre pour un passeport de 28 pages délivré en Algérie"
+print("Question:", query)
+answer = rag.run(query)
+print("-"*38,"answer","-"*38)
+print("Answer:", answer)
