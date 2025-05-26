@@ -46,7 +46,7 @@ def apply_keyword_boost(results,documents, keywords, top_k=5):
 def parse_query(query,fields):
     """Extract filters and keywords from query using LLM"""
     response = ollama.generate(
-        model="deepseek-r1:32b",
+        model="deepseek-r1:7b",
         prompt=f"""Analyze this legal query and output:
         1. Metadata filters (field , chapter name (Derived from the field and keywords)) 
         

@@ -11,7 +11,7 @@ import os
 
 
 
-# 1. Load Documents (Already Split)
+
 
 
 class RagEngine():
@@ -36,7 +36,7 @@ class RagEngine():
             pbar.update(1)
         pbar.close()
         # 2. Compute Embeddings for Each Document Using Ollama
-        data_path = "C:\dev\Ramzey\MOUSTACHAR\RAG\\embeddings"
+        data_path = "embeddings/"
         files = os.listdir(data_path)
         if not files :
             pbar = tqdm.tqdm(total=len(laws))
@@ -44,7 +44,7 @@ class RagEngine():
             all_embeddings = []
             for doc in self.documents:
                 response = ollama.embeddings(
-                    model="snowflake-arctic-embed2",
+                    model="nomic-embed-text:latest",
                     prompt=doc
                 )
                 all_embeddings.append(response["embedding"])
@@ -78,7 +78,7 @@ class RagEngine():
         
         # Step 2: Vector search with metadata filtering
         query_embedding = ollama.embeddings(
-            model="snowflake-arctic-embed2",
+            model="nomic-embed-text:latest",
             prompt=query
         )["embedding"]
         print(len(eligible_indices))
@@ -100,7 +100,7 @@ class RagEngine():
         print(context_docs)
         # Generate answer
         response = ollama.generate(
-            model="deepseek-r1:32b",
+            model="deepseek-r1:7b",
             prompt=f"""Legal Context:
             {context_docs}
             
@@ -120,10 +120,10 @@ def format_context(docs, metas):
 
 
 rag = RagEngine()
-query = "combien peut une personne physique ne peut appartenir conseils de surveillance de sociétés par actions ayant leur siège social en Algérie simultanément "
-query = "Quelle proportion minimale de la surface rédactionnelle une publication périodique d’information générale, régionale ou locale doit-elle consacrer à des contenus relatifs à sa zone de couverture géographique ?"
-query = "Quel est le montant du droit de timbre pour un passeport de 28 pages délivré en Algérie"
-print("Question:", query)
-answer = rag.run(query)
+query_1 = "combien peut une personne physique ne peut appartenir conseils de surveillance de sociétés par actions ayant leur siège social en Algérie simultanément "
+query2 = "Quelle proportion minimale de la surface rédactionnelle une publication périodique d’information générale, régionale ou locale doit-elle consacrer à des contenus relatifs à sa zone de couverture géographique ?"
+
+print("Question:", query_1)
+answer = rag.run(query_1)
 print("-"*38,"answer","-"*38)
 print("Answer:", answer)

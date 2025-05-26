@@ -6,4 +6,5 @@ scrape.py
 tables.txt
 RAG/dairi.ipynb
 RAG/main.py
-
+CV.py
+cv.txt
