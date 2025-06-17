@@ -103,9 +103,10 @@ class RagEngine():
             model="deepseek-r1:7b",
             prompt=f"""Legal Context:
             {context_docs}
-            
+            act as legal advisor and answer based on context
             Question: {query}
-            act as legal advisor and answer based on context"""
+            Answer in French
+            """
         )
         return response["response"]
 
@@ -119,11 +120,4 @@ def format_context(docs, metas):
     )
 
 
-rag = RagEngine()
-query_1 = "combien peut une personne physique ne peut appartenir conseils de surveillance de sociétés par actions ayant leur siège social en Algérie simultanément "
-query2 = "Quelle proportion minimale de la surface rédactionnelle une publication périodique d’information générale, régionale ou locale doit-elle consacrer à des contenus relatifs à sa zone de couverture géographique ?"
 
-print("Question:", query_1)
-answer = rag.run(query_1)
-print("-"*38,"answer","-"*38)
-print("Answer:", answer)

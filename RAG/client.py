@@ -3,9 +3,10 @@ from PIL import Image
 from io import BytesIO
 import matplotlib.pyplot as plt
 # Send POST request to Flask server
+query_1 = "combien peut une personne physique ne peut appartenir conseils de surveillance de sociétés par actions ayant leur siège social en Algérie simultanément "
 response = requests.post(
     "http://127.0.0.1:5000/process_text",
-    json={"prompt": "Show images about Algeria"}
+    json={"prompt": f"{query_1}"}
 )
 
 # Check if the request was successful

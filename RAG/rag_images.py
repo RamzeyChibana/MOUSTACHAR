@@ -115,7 +115,7 @@ class RagEngine():
         print(boosted_results)
         # Get top 3 results
         top_indices = [idx for idx, _ in boosted_results]
-        context_indices = [i for i,dist in boosted_results if dist<420]
+        context_indices = [i for i,dist in boosted_results if dist<500]
         context_texts = [self.documents[i] for i in context_indices if self.metadata[i]["file"]==""]
         print(context_texts)
    

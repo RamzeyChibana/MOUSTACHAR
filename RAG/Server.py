@@ -25,7 +25,7 @@ def images(filename):
 
 
 
-@app.route('/get_images', methods=['POST'])
+@app.route('/process_text', methods=['POST'])
 def get_images():
     data = request.get_json()
     query = data.get('name')
@@ -48,4 +48,4 @@ def get_images():
     return jsonify(images=urls)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=4000)
+    app.run()
